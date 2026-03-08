@@ -30,6 +30,10 @@ app.use('/api/enrollments', enrollmentRoutes)
 app.use('/api/progress', progressRoutes)
 app.use('/api/sections', sectionRoutes)
 
+app.get('/', (req, res) => {
+  res.send('LMS Backend is running!')
+})
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'LMS API is running' })
