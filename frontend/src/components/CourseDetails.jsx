@@ -79,8 +79,8 @@ const CourseDetails = () => {
     try {
       const userData = JSON.parse(localStorage.getItem('userData'))
       await api.post('/enrollments', {
-        user_id: userData.id,
-        course_id: id
+        userId: userData.id,
+        courseId: id
       })
       setEnrolled(true)
       alert('Successfully enrolled in the course!')

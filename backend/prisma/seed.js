@@ -160,19 +160,19 @@ async function main() {
               create: [
                 {
                   title: 'What is Machine Learning?',
-                  youtubeUrl: 'GwIo9gDZCVQ',
+                  youtubeUrl: 'q66XvRzh9nI',
                   duration: '20:00',
                   order: 1,
                 },
                 {
                   title: 'Types of Machine Learning',
-                  youtubeUrl: 'H1e7fIRutxk',
+                  youtubeUrl: '1VS_7S9qMCY',
                   duration: '20:00',
                   order: 2,
                 },
                 {
                   title: 'ML Algorithms Overview',
-                  youtubeUrl: 'RRubcjpTkks',
+                  youtubeUrl: 'iVaq1_K46V8',
                   duration: '20:00',
                   order: 3,
                 },

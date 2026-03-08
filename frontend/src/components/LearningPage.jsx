@@ -79,16 +79,26 @@ const LearningPage = ({ user }) => {
   }
 
   const handleVideoEnd = async () => {
+    if (isLessonCompleted(currentLesson.id)) return
+
     try {
       // Mark lesson as completed
       await api.post('/progress', {
-        user_id: user.id,
-        lesson_id: currentLesson.id,
+        userId: user.id,
+        lessonId: currentLesson.id,
         completed: true
       })
       
-      // Update local progress
-      setProgress([...progress, { lesson_id: currentLesson.id, completed: true }])
+      // Update local progress without duplicates
+      setProgress(prev => {
+        const exists = prev.some(p => (p.lessonId || p.lesson_id) === currentLesson.id)
+        if (exists) {
+          return prev.map(p => 
+            (p.lessonId || p.lesson_id) === currentLesson.id ? { ...p, completed: true } : p
+          )
+        }
+        return [...prev, { lessonId: currentLesson.id, completed: true }]
+      })
       
       // Auto-advance to next lesson
       const nextLesson = getNextLesson()
@@ -103,7 +113,7 @@ const LearningPage = ({ user }) => {
   }
 
   const isLessonCompleted = (lessonId) => {
-    return progress.some(p => p.lesson_id === lessonId && p.completed)
+    return progress.some(p => (p.lessonId === lessonId || p.lesson_id === lessonId) && p.completed)
   }
 
   const getPreviousLesson = () => {
@@ -127,13 +137,27 @@ const LearningPage = ({ user }) => {
   }
 
   const calculateProgress = () => {
-    let totalLessons = 0
+    // Get all lesson IDs for the current course
+    const courseLessonIds = []
     sections.forEach(section => {
-      totalLessons += section.lessons.length
+      section.lessons.forEach(lesson => {
+        courseLessonIds.push(lesson.id)
+      })
     })
     
-    const completedLessons = progress.filter(p => p.completed).length
-    return Math.round((completedLessons / totalLessons) * 100)
+    const totalLessons = courseLessonIds.length
+    if (totalLessons === 0) return 0
+    
+    // Only count completed lessons that belong to this course
+    const completedInCourse = progress.filter(p => {
+      const lid = p.lessonId || p.lesson_id
+      return p.completed && courseLessonIds.includes(lid)
+    })
+    
+    const uniqueCompletedIds = new Set(completedInCourse.map(p => p.lessonId || p.lesson_id))
+    const completedCount = uniqueCompletedIds.size
+    
+    return Math.round((completedCount / totalLessons) * 100)
   }
 
   if (loading || !currentLesson) {
@@ -153,7 +177,7 @@ const LearningPage = ({ user }) => {
             {/* YouTube Video Player */}
             <div className="aspect-w-16 aspect-h-9">
               <iframe
-                src={`https://www.youtube.com/embed/${currentLesson.youtube_url}?autoplay=1&rel=0`}
+                src={`https://www.youtube.com/embed/${currentLesson.youtubeUrl || currentLesson.youtube_url}?autoplay=1&rel=0`}
                 title={currentLesson.title}
                 className="w-full h-[500px]"
                 frameBorder="0"
@@ -189,9 +213,14 @@ const LearningPage = ({ user }) => {
                 
                 <button
                   onClick={handleVideoEnd}
-                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
+                  disabled={isLessonCompleted(currentLesson.id)}
+                  className={`px-6 py-2 rounded-md transition-colors ${
+                    isLessonCompleted(currentLesson.id)
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
                 >
-                  ✓ Mark as Complete
+                  {isLessonCompleted(currentLesson.id) ? '✓ Completed' : '✓ Mark as Complete'}
                 </button>
                 
                 <button
@@ -231,7 +260,15 @@ const LearningPage = ({ user }) => {
               </div>
             </div>
             <div className="text-sm text-gray-600">
-              {progress.filter(p => p.completed).length} of {
+              {(() => {
+                const courseLessonIds = []
+                sections.forEach(s => s.lessons.forEach(l => courseLessonIds.push(l.id)))
+                const uniqueCompletedInCourse = new Set(
+                  progress.filter(p => p.completed && courseLessonIds.includes(p.lessonId || p.lesson_id))
+                  .map(p => p.lessonId || p.lesson_id)
+                )
+                return uniqueCompletedInCourse.size
+              })()} of {
                 sections.reduce((acc, section) => acc + section.lessons.length, 0)
               } lessons completed
             </div>
