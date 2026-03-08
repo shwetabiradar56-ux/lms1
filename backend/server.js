@@ -45,9 +45,11 @@ app.use((err, req, res, next) => {
 })
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-  console.log(`📚 Environment: ${process.env.NODE_ENV}`)
-})
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
+    console.log(`📚 Environment: ${process.env.NODE_ENV}`)
+  })
+}
 
 export default app
