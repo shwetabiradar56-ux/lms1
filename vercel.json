@@ -19,12 +19,12 @@
       "destination": "backend/server.js"
     },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/frontend/$1"
+      "source": "/",
+      "destination": "frontend/index.html"
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/index.html"
+      "destination": "frontend/$1"
     }
   ]
 }
