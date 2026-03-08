@@ -18,8 +18,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "frontend/$1",
-      "continue": true
+      "destination": "frontend/$1"
     },
     {
       "source": "/(.*)",
